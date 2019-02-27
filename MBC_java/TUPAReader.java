@@ -34,8 +34,15 @@ public class TUPAReader {
 					String intCell = intRow[j];
 					intCell.trim();
 					intCell = intCell.substring(1,intCell.length()-1);
-					String[] cell = intCell.split("-");
-					TUPA[i][j] = new Interval(Integer.parseInt(cell[0]) , Integer.parseInt(cell[1]));
+
+					if(intCell.length() == 0) {
+						TUPA[i][j] = new Interval(0,0);
+					}
+
+					else{
+						String[] cell = intCell.split("-");
+						TUPA[i][j] = new Interval(Integer.parseInt(cell[0]) , Integer.parseInt(cell[1]));
+					}
 				}
 
 				i++;
