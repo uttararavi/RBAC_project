@@ -3,8 +3,8 @@ import java.util.*;
 import MBCpackage.*;
 
 public class Interval {
-    private final double min;
-    private final double max;
+     double min;
+     double max;
 
     /**
      * Initializes a closed interval [min, max].
