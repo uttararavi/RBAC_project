@@ -59,39 +59,48 @@ class main{
 		String TUPAfile = "nonTemporal_Dataset/TUPA_test.txt";
 
 		TUPAReader tupaReader = new TUPAReader(TUPAfile);
-		
-		// // put this in a loop for all Loops
-		// MBC miner = new MBC(reader.UPA);//Perform role mining using the MBC class
-		// //miner.DisplayRoles(); //In case one wants to display the roles
 
-		// ReadDataset verifyWith = new ReadDataset(miner.roleSet,reader.users,reader.perms);
+		// for(int i = 0; i < tupaReader.intList.size(); i++) {
 
-		// // }
-		// /*ReadDataset class has constructor overloading, wherein it can also construct the UPA
-		// using the roles generated*/
-		// VerifyUPA verify = new VerifyUPA(reader.UPA,verifyWith.UPA); //pass the original and reconstructed UPA
-		// /*VerifyUPA class compares element by element to ensure that the two UPAs are exactly equal*/
+		// 	// put this in a loop for all Loops
+		// 	Integer[][] passUPA = tupaReader.UPAmap.get(tupaReader.intList.get(i));
+		// 	MBC miner = new MBC(passUPA);//Perform role mining using the MBC class
+		// 	System.out.println("DisplayRoles");
+		// 	miner.DisplayRoles(); //In case one wants to display the roles
+		// 	System.out.println("###");
+		// 	ReadDataset verifyWith = new ReadDataset(miner.roleSet,tupaReader.users,tupaReader.perms);
 
-		// System.out.println("\n*** FileName : "+commonString+" ***");
-		// System.out.println("Number of users = "+reader.users);
-		// System.out.println("Numebr of permissions = "+reader.perms);
-		// System.out.println("Given number of roles = "+reader.roles);
-		// System.out.println("Number of mined roles = "+miner.roleSet.size());
-		// System.out.println("UPAs match?: "+verify.truthValue);
+		// 	// }
+		// 	/*ReadDataset class has constructor overloading, wherein it can also construct the UPA
+		// 	using the roles generated*/
+		// 	VerifyUPA verify = new VerifyUPA(passUPA,verifyWith.UPA); //pass the original and reconstructed UPA
+		// 	//VerifyUPA class compares element by element to ensure that the two UPAs are exactly equal
 
-		// //Print UPA testing code
-		// /*
-		// row = verifyWith.UPA.length;
-		// col = verifyWith.UPA[0].length;
-		// for(int i=0;i<row;i++)
-		// {
-		// 	for(int j=0;j<col;j++)
-		// 		System.out.print(verifyWith.UPA[i][j]+" ");
-		// 	System.out.println();
-		// }//*/
+		// 	// System.out.println("\n*** FileName : "+commonString+" ***");
+		// 	System.out.println("Number of users = "+tupaReader.users);
+		// 	System.out.println("Numebr of permissions = "+tupaReader.perms);
+		// 	System.out.println("Given number of roles = "+tupaReader.roles);
+		// 	System.out.println("Number of mined roles = "+miner.roleSet.size());
+		// 	System.out.println("UPAs match?: "+verify.truthValue);
 
-		// long endTime   = System.nanoTime();
-		// long totalTime = endTime - startTime;
-		// System.out.println(totalTime/Math.pow(10,9)+" seconds");
+		// 	//Print UPA testing code
+		// 	/*
+		// 	row = verifyWith.UPA.length;
+		// 	col = verifyWith.UPA[0].length;
+		// 	for(int i=0;i<row;i++)
+		// 	{
+		// 		for(int j=0;j<col;j++)
+		// 			System.out.print(verifyWith.UPA[i][j]+" ");
+		// 		System.out.println();
+		// 	}//*/
+
+		// 	long endTime   = System.nanoTime();
+		// 	long totalTime = endTime - startTime;
+		// 	System.out.println(totalTime/Math.pow(10,9)+" seconds");
+
+		// }
 	}
 }
+
+// 415196bc62d712d814929bc2f2d21c628df07938
+// 8f98a190948eb6a2da6a98ac749d1692c289063e

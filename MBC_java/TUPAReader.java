@@ -8,6 +8,7 @@ public class TUPAReader {
 	int users, perms, roles;
 	HashMap<Interval, Integer[][]> UPAmap;
 	Interval[][] TUPA;
+	ArrayList<Interval> intList;
 
 	TUPAReader(String TUPAfile) {
 
@@ -82,7 +83,7 @@ public class TUPAReader {
 		// 	System.out.println();
 		// }
 
-		ArrayList<Interval> intList = new ArrayList<Interval>();
+		intList = new ArrayList<Interval>();
 
 		for(int i = 0; i < users; i++) {
 			for(int j = 0; j < perms; j++) {
