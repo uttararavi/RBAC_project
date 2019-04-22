@@ -1,6 +1,0 @@
-Give UA and PA file name
-Object of ReadDataset class is created (k/as reader)
-Object of ReadDataset class is created (k/as verifyWith)
-
-VerifyUPA class compares the actual UPA with the mined UPA 
-

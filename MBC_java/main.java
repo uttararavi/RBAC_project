@@ -56,9 +56,21 @@ class main{
 		// 	System.out.println();
 		// }
 
-		String TUPAfile = "nonTemporal_Dataset/TUPA_test.txt";
+		/* Does the TUPA splitting */
+		// String TUPAfile = "nonTemporal_Dataset/TUPA_test.txt";
 
-		TUPAReader tupaReader = new TUPAReader(TUPAfile);
+		// TUPAReader tupaReader = new TUPAReader(TUPAfile);
+
+		/* Does the STUPA splitting */
+
+		/* Make a list of regions by reading plan.txt */
+
+
+		String STUPAfile = "nonTemporal_Dataset/STUPA_test.txt";
+
+		STUPAReader stupaReader = new STUPAReader(STUPAfile, "plan.txt");
+
+
 
 		// for(int i = 0; i < tupaReader.intList.size(); i++) {
 

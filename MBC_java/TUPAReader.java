@@ -57,17 +57,6 @@ public class TUPAReader {
 			e.printStackTrace();	
 		}
 
-		//printing TUPA
-		// System.out.println("printing TUPA");
-		// for(int i = 0; i < users; i++) {
-		// 	for(int j = 0; j < perms; j++) {
-		// 		System.out.print(TUPA[i][j].min + "," + TUPA[i][j].max + "  ");
-		// 	}
-
-		// 	System.out.println();
-		// }
-
-
 		createUPAlist();
 
 	}
@@ -117,6 +106,13 @@ public class TUPAReader {
 
 			UPAmap.put(intList.get(i) , tempUPA);
 		}
+
+		printUPAlist();
+		
+
+	}
+
+	void printUPAlist() {
 
 		// printing list of UPAs
 		System.out.println("printing list of UPAs");

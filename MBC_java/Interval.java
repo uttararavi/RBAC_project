@@ -128,15 +128,15 @@ public class Interval {
     /**
      * Unit tests the {@code Interval} data type.
      */
-    public static void main(String[] args) {
-        Interval[] intervals = new Interval[4];
-        intervals[0] = new Interval(15.0, 33.0);
-        intervals[1] = new Interval(45.0, 60.0);
-        intervals[2] = new Interval(20.0, 70.0);
-        intervals[3] = new Interval(46.0, 55.0);
+    // public static void main(String[] args) {
+    //     Interval[] intervals = new Interval[4];
+    //     intervals[0] = new Interval(15.0, 33.0);
+    //     intervals[1] = new Interval(45.0, 60.0);
+    //     intervals[2] = new Interval(20.0, 70.0);
+    //     intervals[3] = new Interval(46.0, 55.0);
 
-        for (int i = 0; i < intervals.length; i++)
-            System.out.println(intervals[i]);
-        System.out.println();
-    }
+    //     for (int i = 0; i < intervals.length; i++)
+    //         System.out.println(intervals[i]);
+    //     System.out.println();
+    // }
 }
