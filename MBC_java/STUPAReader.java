@@ -19,13 +19,16 @@ class STUPAReader {
 		generateRegionMap(planFile);
 		generateSTUPA(STUPAfile);
 		generateTUPAandSUPA();
+		
 		// printTUPA();
 		// printSUPA();
 
-		// generateUPAlistFromTUPA();
+		generateUPAlistFromTUPA();
+
 		// printUPAfromTUPAlist();
 		generateUPAlistFromSUPA();
-		printUPAfromSUPAlist();
+
+		// printUPAfromSUPAlist();
 
 	}
 

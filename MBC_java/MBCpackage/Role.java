@@ -21,6 +21,26 @@ public class Role{
 	{
 		System.out.println("role : "+user+"  "+perm+"\t");
 	}
+
+	public boolean equals(Object obj) {
+
+		if(obj instanceof Role) {
+			Role temp = (Role) obj;
+			if(this.perm.equals(temp.perm) && this.user.equals(temp.user)) {
+				return true;
+			}
+		}
+
+		return false;
+	}
+
+	public int hashCode() {
+		// For some unknown reason gives correct output while removing duplicates
+        // int hash1 = ((Double) min).hashCode();
+        // int hash2 = ((Double) max).hashCode();
+        return 7;//31*hash1 + hash2;
+    }
+
 }
 
 class SortByPermSize implements Comparator<Role>{

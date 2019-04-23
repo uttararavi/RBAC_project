@@ -66,53 +66,106 @@ class main{
 		/* Make a list of regions by reading plan.txt */
 
 
+
 		String STUPAfile = "nonTemporal_Dataset/STUPA_test.txt";
 
 		STUPAReader stupaReader = new STUPAReader(STUPAfile, "plan.txt");
 
+		HashMap<Interval, ArrayList<Role>> intRoleSetMap = new HashMap<Interval, ArrayList<Role>>();
+		/*********/
+		Set<Role> combinedRoleSet = new HashSet<Role>();
 
+		intRoleSetMap = getIntervalRSMap(stupaReader, intRoleSetMap, combinedRoleSet);
 
-		// for(int i = 0; i < tupaReader.intList.size(); i++) {
+		// // Print intRoleSetMap
+		// for(int i = 0; i < intRoleSetMap.size(); i++) {
 
-		// 	// put this in a loop for all Loops
-		// 	Integer[][] passUPA = tupaReader.UPAmap.get(tupaReader.intList.get(i));
-		// 	MBC miner = new MBC(passUPA);//Perform role mining using the MBC class
-		// 	System.out.println("DisplayRoles");
-		// 	miner.DisplayRoles(); //In case one wants to display the roles
-		// 	System.out.println("###");
-		// 	ReadDataset verifyWith = new ReadDataset(miner.roleSet,tupaReader.users,tupaReader.perms);
+		// 	System.out.println("Interval: " + stupaReader.intList.get(i));
 
-		// 	// }
-		// 	/*ReadDataset class has constructor overloading, wherein it can also construct the UPA
-		// 	using the roles generated*/
-		// 	VerifyUPA verify = new VerifyUPA(passUPA,verifyWith.UPA); //pass the original and reconstructed UPA
-		// 	//VerifyUPA class compares element by element to ensure that the two UPAs are exactly equal
-
-		// 	// System.out.println("\n*** FileName : "+commonString+" ***");
-		// 	System.out.println("Number of users = "+tupaReader.users);
-		// 	System.out.println("Numebr of permissions = "+tupaReader.perms);
-		// 	System.out.println("Given number of roles = "+tupaReader.roles);
-		// 	System.out.println("Number of mined roles = "+miner.roleSet.size());
-		// 	System.out.println("UPAs match?: "+verify.truthValue);
-
-		// 	//Print UPA testing code
-		// 	/*
-		// 	row = verifyWith.UPA.length;
-		// 	col = verifyWith.UPA[0].length;
-		// 	for(int i=0;i<row;i++)
-		// 	{
-		// 		for(int j=0;j<col;j++)
-		// 			System.out.print(verifyWith.UPA[i][j]+" ");
-		// 		System.out.println();
-		// 	}//*/
-
-		// 	long endTime   = System.nanoTime();
-		// 	long totalTime = endTime - startTime;
-		// 	System.out.println(totalTime/Math.pow(10,9)+" seconds");
-
+		// 	for(int j = 0; j < intRoleSetMap.get(stupaReader.intList.get(i)).size(); j++) {
+		// 		Role r = intRoleSetMap.get(stupaReader.intList.get(i)).get(j);
+		// 		System.out.println("r" + j +" : " + r.user + "    " + r.perm);
+		// 	}
 		// }
-	}
-}
 
-// 415196bc62d712d814929bc2f2d21c628df07938
-// 8f98a190948eb6a2da6a98ac749d1692c289063e
+		// REB creation for TUPA
+		HashMap<Role, ArrayList<Interval>> REB = new HashMap<Role, ArrayList<Interval>>();
+		REB = generateREBforTUPA(REB, combinedRoleSet, stupaReader, intRoleSetMap);
+
+
+		
+
+	}
+
+	public static HashMap<Interval, ArrayList<Role>> getIntervalRSMap (STUPAReader stupaReader, HashMap<Interval, ArrayList<Role>> intRoleSetMap, Set<Role> combinedRoleSet) {
+
+		for(int i = 0; i < stupaReader.UPAmapTUPA.size(); i++) {
+			int[][] firstUPAfromTUPA = new int[stupaReader.users][stupaReader.perms];
+
+			for(int j = 0; j < stupaReader.users; j++) {
+				for(int k = 0; k < stupaReader.perms; k++) {
+					firstUPAfromTUPA[j][k] = stupaReader.UPAmapTUPA.get(stupaReader.intList.get(i))[j][k].intValue();
+				}
+			}
+
+			// printing first UPA from TUPA 
+			// for(int j = 0; j < stupaReader.users; j++) {
+			// 	for(int k = 0; k < stupaReader.perms; k++) {
+			// 		System.out.print(firstUPAfromTUPA[j][k] + " ");
+			// 	}
+			// 	System.out.println();
+			// }
+
+			MBC miner = new MBC(firstUPAfromTUPA);
+			// combinedRoleSet.addAll(miner.roleSet);
+			for (Role r: miner.roleSet) {
+				combinedRoleSet.add(r);
+			}
+			
+			// add to the map 
+			intRoleSetMap.put(stupaReader.intList.get(i) ,miner.roleSet);
+			// miner.DisplayRoles();
+
+		}
+
+		return intRoleSetMap;
+	}
+
+	public static HashMap<Role, ArrayList<Interval>> generateREBforTUPA(HashMap<Role, ArrayList<Interval>> REB, Set<Role> combinedRoleSet, STUPAReader stupaReader, HashMap<Interval, ArrayList<Role>> intRoleSetMap) {
+		Iterator<Role> itr = combinedRoleSet.iterator();
+
+		while(itr.hasNext()) {
+			ArrayList<Interval> empty = new ArrayList<Interval>();
+			REB.put(itr.next() , empty);
+		}
+
+		// go through the interval RS map, and add the interval for every role it has
+
+		for(int i = 0; i < stupaReader.intList.size(); i++) {
+			for(int j = 0; j < intRoleSetMap.get(stupaReader.intList.get(i)).size(); j++) {
+				Role r = intRoleSetMap.get(stupaReader.intList.get(i)).get(j);
+
+				REB.get(r).add(stupaReader.intList.get(i));
+			}
+		}
+
+		/*** Printing the REB ***/
+		// itr = combinedRoleSet.iterator();
+		// int count = 0;
+		// while(itr.hasNext()) {
+
+		// 	System.out.print("r" + count + ": ");
+		// 	Role r = itr.next();
+		// 	System.out.print(r.user + "   " + r.perm + "-->");
+
+		// 	for(int j = 0; j < REB.get(r).size(); j++) {
+		// 		System.out.print("(" + REB.get(r).get(j).min + "," + REB.get(r).get(j).max + ") ; ");
+		// 	}
+		// 	System.out.println();
+		// 	count++;
+		// }
+
+		return REB;
+	}
+	
+}
