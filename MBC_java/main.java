@@ -13,87 +13,34 @@ class main{
 	public static void main(String args[]) throws IOException
 	{
 		long startTime = System.nanoTime();
-		/****
-		BLOCK 1 : Uncomment two following blocks - 
-		One out of Test input 1 and Test input 2
-		COMMON block 
-		****/
-		/*Test input 1
-		int[][] UPA = {{1,1,1,0,0},{1,1,1,1,0},{0,0,1,1,1},{0,1,1,0,0},{0,1,0,1,0},{0,1,0,0,1}};
-		//*/
-		
-		/*Test input 2
-		int[][] UPA = {{1,0,1,0,0},{1,0,0,0,1},{0,0,0,0,0},{1,0,1,0,0}};
-		//*/
-		
-		/*COMMON : Uncomment this for both test input 1 and test input 2
-		int row = UPA.length;
-		int col = UPA[0].length;
-		//*/
-		/*__________________________END OF BLOCK 1_______________________________*/
-
-		/****
-		BLOCK2 : Uses real datasets. Uncomment the entire block for useage
-		****/
-		// System.out.print("Enter the name of the Dataset: "); /*Get the name of the dataset.
-		// Names of the datasets are stored in 0_README_for_datasets*/
-		// BufferedReader screenReader =  new BufferedReader(new InputStreamReader(System.in)); 
-		// String commonString = screenReader.readLine();
-		// String UAfile = "nonTemporal_Dataset/UA_"+commonString+".txt";
-		// String PAfile = "nonTemporal_Dataset/PA_"+commonString+".txt";
-		// //We have obtained the filename of the UA and PA for the selected dataset.
-		// ReadDataset reader = new ReadDataset(UAfile,PAfile);
-		// /*ReadDataset is a class that reads the UA and PA and computes the UPA.
-		// The UPA is stored as a class member variable. Hence call "reader.UPA" to access the UPA.*/
-
-		// //print UPA
-		// System.out.println("UPA");
-
-		// for(int i = 0; i < reader.users; i++) {
-		// 	for(int j = 0; j < reader.perms; j++) {
-		// 		System.out.print(reader.UPA[i][j]);
-		// 	} 
-		// 	System.out.println();
-		// }
-
-		/* Does the TUPA splitting */
-		// String TUPAfile = "nonTemporal_Dataset/TUPA_test.txt";
-
-		// TUPAReader tupaReader = new TUPAReader(TUPAfile);
 
 		/* Does the STUPA splitting */
 
 		/* Make a list of regions by reading plan.txt */
 
-
-
 		String STUPAfile = "nonTemporal_Dataset/STUPA_test.txt";
 
 		STUPAReader stupaReader = new STUPAReader(STUPAfile, "plan.txt");
 
+		// ####### TUPA Role Mining ######## //
 		HashMap<Interval, ArrayList<Role>> intRoleSetMap = new HashMap<Interval, ArrayList<Role>>();
-		/*********/
 		Set<Role> combinedRoleSet = new HashSet<Role>();
 
 		intRoleSetMap = getIntervalRSMap(stupaReader, intRoleSetMap, combinedRoleSet);
-
-		// // Print intRoleSetMap
-		// for(int i = 0; i < intRoleSetMap.size(); i++) {
-
-		// 	System.out.println("Interval: " + stupaReader.intList.get(i));
-
-		// 	for(int j = 0; j < intRoleSetMap.get(stupaReader.intList.get(i)).size(); j++) {
-		// 		Role r = intRoleSetMap.get(stupaReader.intList.get(i)).get(j);
-		// 		System.out.println("r" + j +" : " + r.user + "    " + r.perm);
-		// 	}
-		// }
 
 		// REB creation for TUPA
 		HashMap<Role, ArrayList<Interval>> REB = new HashMap<Role, ArrayList<Interval>>();
 		REB = generateREBforTUPA(REB, combinedRoleSet, stupaReader, intRoleSetMap);
 
+		// ####### SUPA Role Mining ######## //
+		HashMap<Integer, ArrayList<Role>> regionRoleSetMap = new HashMap<Integer, ArrayList<Role>>();
+		Set<Role> combinedRoleSet2 = new HashSet<Role>();
 
-		
+		regionRoleSetMap = getRegionRSMap(stupaReader, regionRoleSetMap, combinedRoleSet2);
+
+		// REB creation for SUPA
+		HashMap<Role, ArrayList<Integer>> REB2 = new HashMap<Role, ArrayList<Integer>>();
+		REB2 = generateREBforSUPA(REB2, combinedRoleSet2, stupaReader, regionRoleSetMap);
 
 	}
 
@@ -124,7 +71,7 @@ class main{
 			
 			// add to the map 
 			intRoleSetMap.put(stupaReader.intList.get(i) ,miner.roleSet);
-			// miner.DisplayRoles();
+			miner.DisplayRoles();
 
 		}
 
@@ -166,6 +113,85 @@ class main{
 		// }
 
 		return REB;
+	}
+
+	public static HashMap<Role, ArrayList<Integer>> generateREBforSUPA(HashMap<Role, ArrayList<Integer>> REB2, Set<Role> combinedRoleSet2, STUPAReader stupaReader, HashMap<Integer, ArrayList<Role>> regionRoleSetMap) {
+		Iterator<Role> itr = combinedRoleSet2.iterator();
+
+		while(itr.hasNext()) {
+			ArrayList<Integer> empty = new ArrayList<Integer>();
+			REB2.put(itr.next() , empty);
+		}
+
+		// go through the region RS map, and add the region for every role it has
+
+		for(int i = 1; i <= regionRoleSetMap.size(); i++) {
+			for(int j = 0; j < regionRoleSetMap.get(i).size(); j++) {
+				Role r = regionRoleSetMap.get(i).get(j);
+
+				REB2.get(r).add(i);
+			}
+		}
+
+		/*** Printing the REB2 ***/
+		itr = combinedRoleSet2.iterator();
+		int count = 0;
+		while(itr.hasNext()) {
+
+			System.out.print("r" + count + ": ");
+			Role r = itr.next();
+			System.out.print(r.user + "   " + r.perm + "-->    ");
+
+			for(int j = 0; j < REB2.get(r).size(); j++) {
+				System.out.print(REB2.get(r).get(j) + "  ");
+			}
+			System.out.println();
+			count++;
+		}
+
+		return REB2;
+	}
+
+	public static HashMap<Integer, ArrayList<Role>> getRegionRSMap(STUPAReader stupaReader, HashMap<Integer, ArrayList<Role>> regionRoleSetMap, Set<Role> combinedRoleSet2) {
+		for(int i = 1; i <= stupaReader.UPAmapSUPA.size(); i++) {
+
+			int[][] firstUPAfromSUPA = new int[stupaReader.users][stupaReader.perms];
+
+			for(int j = 0; j < stupaReader.users; j++) {
+				for(int k = 0; k < stupaReader.perms; k++) {
+					firstUPAfromSUPA[j][k] = stupaReader.UPAmapSUPA.get(i)[j][k].intValue();
+				}
+			}
+
+			// printing first UPA from TUPA 
+			// System.out.println("i : " + i);
+			// for(int j = 0; j < stupaReader.users; j++) {
+			// 	for(int k = 0; k < stupaReader.perms; k++) {
+			// 		System.out.print(firstUPAfromSUPA[j][k] + " ");
+			// 	}
+			// 	System.out.println();
+			// }
+
+			// System.out.println("##############");
+			// System.out.println();
+
+			MBC miner = new MBC(firstUPAfromSUPA);
+			combinedRoleSet2.addAll(miner.roleSet);
+
+			// miner.DisplayRoles();
+			
+			for (Role r: miner.roleSet) {
+				combinedRoleSet2.add(r);
+			}
+
+
+			
+			// add to the map
+			regionRoleSetMap.put(i, miner.roleSet);
+
+		}
+
+			return regionRoleSetMap;
 	}
 	
 }

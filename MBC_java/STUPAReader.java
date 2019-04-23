@@ -19,7 +19,6 @@ class STUPAReader {
 		generateRegionMap(planFile);
 		generateSTUPA(STUPAfile);
 		generateTUPAandSUPA();
-		
 		// printTUPA();
 		// printSUPA();
 
