@@ -150,7 +150,9 @@ class STUPAReader {
 		try(BufferedReader reader = new BufferedReader(new FileReader(planFile))) {
 			int i = 1;
 			currLine = reader.readLine();
-			while(i <= 4) {
+
+			int numRegions = 4;
+			while(i <= numRegions) {
 				System.out.println("currLine : " + currLine);
 				String tempCell = currLine;
 				tempCell = tempCell.replace("(", "");

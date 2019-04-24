@@ -42,6 +42,149 @@ class main{
 		HashMap<Role, ArrayList<Integer>> REB2 = new HashMap<Role, ArrayList<Integer>>();
 		REB2 = generateREBforSUPA(REB2, combinedRoleSet2, stupaReader, regionRoleSetMap);
 
+		// combine Roles from combinedRoleSet and combinedRoleSet2
+
+		Iterator<Role> itr = combinedRoleSet.iterator();
+		Iterator<Role> itr2 = combinedRoleSet2.iterator();
+
+		ArrayList<RoleFinal> ultRS = new ArrayList<RoleFinal>();
+
+		// Define a final role which has interval list and region number list as well
+
+		
+		while(itr.hasNext()) {
+			Role rt = itr.next();
+			itr2 = combinedRoleSet2.iterator();	
+			while(itr2.hasNext()) {
+				Role rs = itr2.next();
+				// System.out.println(rt.user + " --> " + rt.perm);
+				// System.out.println(rs.user + " --> " + rs.perm);
+				Role temp = new Role();
+				temp.user.addAll(rt.user);
+				temp.perm.addAll(rt.perm);
+
+				temp.user.retainAll(rs.user);
+				temp.perm.retainAll(rs.perm);
+
+				// System.out.println(temp.user + " --> " + temp.perm);
+
+				if(temp.user.size() == 0 || temp.perm.size() == 0) {
+					// System.out.println("No ");
+				}
+
+				else {
+					// System.out.println("Yes ");
+					RoleFinal newRole = new RoleFinal();
+					newRole.user = temp.user;
+					newRole.perm = temp.perm;
+					newRole.region.addAll(REB2.get(rs));
+					for(int i = 0; i < REB.get(rt).size(); i++) {
+						Interval tempInterval = new Interval(REB.get(rt).get(i).min, REB.get(rt).get(i).max);
+						newRole.timeInt.add(tempInterval);
+					}
+					ultRS.add(newRole);
+				}
+
+				// System.out.println("---------------------------");
+			}
+
+		}
+		
+		Boolean canMerge = false;
+		do {
+			for(int i = 0; i < ultRS.size()-1; i++) {
+				for(int j = i+1; j < ultRS.size(); j++) {
+
+					int l1 = ultRS.size();
+					ultRS = checkCompatible(ultRS, i, j);
+					int l2 = ultRS.size();
+
+					if(l1 > l2) {
+						canMerge = true;
+					}
+
+					else {
+						canMerge = false;
+					}
+				}
+			}
+		} while (canMerge);
+
+		// print all the new "RoleFinals"
+
+		for(int i = 0; i < ultRS.size(); i++) {
+			System.out.print("r" + i + " ");
+			System.out.print(ultRS.get(i).user + "  ");
+			System.out.println(ultRS.get(i).perm + "  ");
+
+			for(int j = 0; j < ultRS.get(i).timeInt.size(); j++) {
+				System.out.print("(" + ultRS.get(i).timeInt.get(j).min + "," + ultRS.get(i).timeInt.get(j).max + ") ");
+			}
+
+			for(int j = 0; j < ultRS.get(i).region.size(); j++) {
+				System.out.print(ultRS.get(i).region.get(j) + "  ");
+			}
+			System.out.println();
+			System.out.println("---------------------");
+
+		}
+
+		System.out.println("Total roles : " + ultRS.size());
+
+		// for(int i = 0; i < ultRS.size()-1; i++) {
+		// 	for(int j = i+1; j < ultRS.size(); j++) {
+		// 		ultRS = checkCompatible(ultRS, i, j);
+		// 	}
+		// }
+
+		long endTime = System.nanoTime();
+		
+		long totalTime = endTime - startTime;
+		System.out.println(totalTime/Math.pow(10,9)+" seconds");
+
+	}
+
+	public static ArrayList<RoleFinal> checkCompatible (ArrayList<RoleFinal> ultRS, int i, int j) {
+		// user, time, region 
+		if(ultRS.get(i).user.equals(ultRS.get(j).user) && 
+			ultRS.get(i).region.equals(ultRS.get(j).region) &&
+			ultRS.get(i).timeInt.equals(ultRS.get(j).timeInt)) {
+				ultRS.get(i).perm.addAll(ultRS.get(j).perm);
+				ultRS.remove(j);	
+				// System.out.println("Needs further merging");
+		}
+
+		// user, perm, region 
+		else if(ultRS.get(i).user.equals(ultRS.get(j).user) && 
+			ultRS.get(i).region.equals(ultRS.get(j).region) &&
+			ultRS.get(i).perm.equals(ultRS.get(j).perm)) {
+				ultRS.get(i).timeInt.addAll(ultRS.get(j).timeInt);
+				ultRS.remove(j);
+				// System.out.println("Needs further merging");
+
+		}
+
+		// user, perm, time
+		else if(ultRS.get(i).user.equals(ultRS.get(j).user) && 
+			ultRS.get(i).perm.equals(ultRS.get(j).perm) &&
+			ultRS.get(i).timeInt.equals(ultRS.get(j).timeInt)) {
+				ultRS.get(i).region.addAll(ultRS.get(j).region);
+				ultRS.remove(j);
+				// System.out.println("Needs further merging");
+
+		}
+
+		// perm, time, region
+		else if(ultRS.get(i).perm.equals(ultRS.get(j).perm) && 
+			ultRS.get(i).region.equals(ultRS.get(j).region) &&
+			ultRS.get(i).timeInt.equals(ultRS.get(j).timeInt)) {
+				ultRS.get(i).user.addAll(ultRS.get(j).user);
+				ultRS.remove(j);
+				// System.out.println("Needs further merging");
+
+		}
+
+		return ultRS;
 	}
 
 	public static HashMap<Interval, ArrayList<Role>> getIntervalRSMap (STUPAReader stupaReader, HashMap<Interval, ArrayList<Role>> intRoleSetMap, Set<Role> combinedRoleSet) {
@@ -71,7 +214,7 @@ class main{
 			
 			// add to the map 
 			intRoleSetMap.put(stupaReader.intList.get(i) ,miner.roleSet);
-			miner.DisplayRoles();
+			// miner.DisplayRoles();
 
 		}
 
@@ -96,7 +239,7 @@ class main{
 			}
 		}
 
-		/*** Printing the REB ***/
+		// /*** Printing the REB ***/
 		// itr = combinedRoleSet.iterator();
 		// int count = 0;
 		// while(itr.hasNext()) {
@@ -133,21 +276,21 @@ class main{
 			}
 		}
 
-		/*** Printing the REB2 ***/
-		itr = combinedRoleSet2.iterator();
-		int count = 0;
-		while(itr.hasNext()) {
+		// /*** Printing the REB2 ***/
+		// itr = combinedRoleSet2.iterator();
+		// int count = 0;
+		// while(itr.hasNext()) {
 
-			System.out.print("r" + count + ": ");
-			Role r = itr.next();
-			System.out.print(r.user + "   " + r.perm + "-->    ");
+		// 	System.out.print("r" + count + ": ");
+		// 	Role r = itr.next();
+		// 	System.out.print(r.user + "   " + r.perm + "-->    ");
 
-			for(int j = 0; j < REB2.get(r).size(); j++) {
-				System.out.print(REB2.get(r).get(j) + "  ");
-			}
-			System.out.println();
-			count++;
-		}
+		// 	for(int j = 0; j < REB2.get(r).size(); j++) {
+		// 		System.out.print(REB2.get(r).get(j) + "  ");
+		// 	}
+		// 	System.out.println();
+		// 	count++;
+		// }
 
 		return REB2;
 	}
