@@ -117,10 +117,12 @@ class main{
 			System.out.print(ultRS.get(i).user + "  ");
 			System.out.println(ultRS.get(i).perm + "  ");
 
+			System.out.print("int : ");
 			for(int j = 0; j < ultRS.get(i).timeInt.size(); j++) {
 				System.out.print("(" + ultRS.get(i).timeInt.get(j).min + "," + ultRS.get(i).timeInt.get(j).max + ") ");
 			}
-
+			System.out.println();
+			System.out.print("region : ");
 			for(int j = 0; j < ultRS.get(i).region.size(); j++) {
 				System.out.print(ultRS.get(i).region.get(j) + "  ");
 			}
@@ -138,7 +140,7 @@ class main{
 		// }
 
 		long endTime = System.nanoTime();
-		
+
 		long totalTime = endTime - startTime;
 		System.out.println(totalTime/Math.pow(10,9)+" seconds");
 
