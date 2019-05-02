@@ -14,17 +14,17 @@ class main{
 	{
 		long startTime = System.nanoTime();
 
-		/* Does the STUPA splitting */
+		/* Input your filename */
+		
+		String STUPAfile = "STUPADataset/u200p200f1d20/STUPA5.txt";
 
-		/* Make a list of regions by reading plan.txt */
-
-		String STUPAfile = "nonTemporal_Dataset/STUPA_test.txt";
-
+		/* Plan.txt contains all the regions with their coordinates */
 		STUPAReader stupaReader = new STUPAReader(STUPAfile, "plan.txt");
 
-		// ####### TUPA Role Mining ######## //
-		HashMap<Interval, ArrayList<Role>> intRoleSetMap = new HashMap<Interval, ArrayList<Role>>();
-		Set<Role> combinedRoleSet = new HashSet<Role>();
+		/* TUPA Role Mining */
+
+		HashMap<Interval, ArrayList<Role>> intRoleSetMap = new HashMap<Interval, ArrayList<Role>>();	// contains interval to Roles mapping
+		Set<Role> combinedRoleSet = new HashSet<Role>(); // contains all the roles from Temporal RM
 
 		intRoleSetMap = getIntervalRSMap(stupaReader, intRoleSetMap, combinedRoleSet);
 
@@ -32,9 +32,9 @@ class main{
 		HashMap<Role, ArrayList<Interval>> REB = new HashMap<Role, ArrayList<Interval>>();
 		REB = generateREBforTUPA(REB, combinedRoleSet, stupaReader, intRoleSetMap);
 
-		// ####### SUPA Role Mining ######## //
-		HashMap<Integer, ArrayList<Role>> regionRoleSetMap = new HashMap<Integer, ArrayList<Role>>();
-		Set<Role> combinedRoleSet2 = new HashSet<Role>();
+		/* SUPA Role Mining */
+		HashMap<Integer, ArrayList<Role>> regionRoleSetMap = new HashMap<Integer, ArrayList<Role>>();	// contains region to Roles mapping
+		Set<Role> combinedRoleSet2 = new HashSet<Role>(); // contains all the roles from Spatial RM
 
 		regionRoleSetMap = getRegionRSMap(stupaReader, regionRoleSetMap, combinedRoleSet2);
 
@@ -44,21 +44,95 @@ class main{
 
 		// combine Roles from combinedRoleSet and combinedRoleSet2
 
+		ArrayList<RoleFinal> finalSTRoleSet = new ArrayList<RoleFinal>();	// contains combined roleset
+		finalSTRoleSet = getSpatioTemporalRoles(finalSTRoleSet, combinedRoleSet, combinedRoleSet2, REB, REB2);
+
+
+		// print all the spatio-temporal roles
+		printFinalRoleSet(finalSTRoleSet);
+
+		long endTime = System.nanoTime();
+		long totalTime = endTime - startTime;
+		System.out.println(totalTime/Math.pow(10,9)+" seconds");
+
+	}
+
+	public static ArrayList<RoleFinal> checkCompatible (ArrayList<RoleFinal> finalSTRoleSet, int i, int j) {
+		// user, time, region 
+		if(finalSTRoleSet.get(i).user.equals(finalSTRoleSet.get(j).user) && 
+			finalSTRoleSet.get(i).region.equals(finalSTRoleSet.get(j).region) &&
+			finalSTRoleSet.get(i).timeInt.equals(finalSTRoleSet.get(j).timeInt)) {
+				finalSTRoleSet.get(i).perm.addAll(finalSTRoleSet.get(j).perm);
+				finalSTRoleSet.remove(j);	
+				// System.out.println("Needs further merging");
+		}
+
+		// user, perm, region 
+		else if(finalSTRoleSet.get(i).user.equals(finalSTRoleSet.get(j).user) && 
+			finalSTRoleSet.get(i).region.equals(finalSTRoleSet.get(j).region) &&
+			finalSTRoleSet.get(i).perm.equals(finalSTRoleSet.get(j).perm)) {
+				finalSTRoleSet.get(i).timeInt.addAll(finalSTRoleSet.get(j).timeInt);
+				finalSTRoleSet.remove(j);
+				// System.out.println("Needs further merging");
+
+		}
+
+		// user, perm, time
+		else if(finalSTRoleSet.get(i).user.equals(finalSTRoleSet.get(j).user) && 
+			finalSTRoleSet.get(i).perm.equals(finalSTRoleSet.get(j).perm) &&
+			finalSTRoleSet.get(i).timeInt.equals(finalSTRoleSet.get(j).timeInt)) {
+				finalSTRoleSet.get(i).region.addAll(finalSTRoleSet.get(j).region);
+				finalSTRoleSet.remove(j);
+				// System.out.println("Needs further merging");
+
+		}
+
+		// perm, time, region
+		else if(finalSTRoleSet.get(i).perm.equals(finalSTRoleSet.get(j).perm) && 
+			finalSTRoleSet.get(i).region.equals(finalSTRoleSet.get(j).region) &&
+			finalSTRoleSet.get(i).timeInt.equals(finalSTRoleSet.get(j).timeInt)) {
+				finalSTRoleSet.get(i).user.addAll(finalSTRoleSet.get(j).user);
+				finalSTRoleSet.remove(j);
+				// System.out.println("Needs further merging");
+
+		}
+
+		return finalSTRoleSet;
+	}
+
+	public static void printFinalRoleSet(ArrayList<RoleFinal> finalSTRoleSet) {
+		for(int i = 0; i < finalSTRoleSet.size(); i++) {
+			System.out.print("r" + i + " ");
+			System.out.print(finalSTRoleSet.get(i).user + "  ");
+			System.out.println(finalSTRoleSet.get(i).perm + "  ");
+
+			System.out.print("int : ");
+			for(int j = 0; j < finalSTRoleSet.get(i).timeInt.size(); j++) {
+				System.out.print("(" + finalSTRoleSet.get(i).timeInt.get(j).min + "," + finalSTRoleSet.get(i).timeInt.get(j).max + ") ");
+			}
+			System.out.println();
+			System.out.print("region : ");
+			for(int j = 0; j < finalSTRoleSet.get(i).region.size(); j++) {
+				System.out.print(finalSTRoleSet.get(i).region.get(j) + "  ");
+			}
+			System.out.println();
+			System.out.println("---------------------");
+
+		}
+
+		System.out.println("Total roles : " + finalSTRoleSet.size());
+	}
+
+	public static ArrayList<RoleFinal> getSpatioTemporalRoles (ArrayList<RoleFinal> finalSTRoleSet, Set<Role> combinedRoleSet, Set<Role> combinedRoleSet2, HashMap<Role, ArrayList<Interval>> REB, HashMap<Role, ArrayList<Integer>> REB2) {
 		Iterator<Role> itr = combinedRoleSet.iterator();
 		Iterator<Role> itr2 = combinedRoleSet2.iterator();
-
-		ArrayList<RoleFinal> ultRS = new ArrayList<RoleFinal>();
-
-		// Define a final role which has interval list and region number list as well
-
 		
+
 		while(itr.hasNext()) {
 			Role rt = itr.next();
 			itr2 = combinedRoleSet2.iterator();	
 			while(itr2.hasNext()) {
 				Role rs = itr2.next();
-				// System.out.println(rt.user + " --> " + rt.perm);
-				// System.out.println(rs.user + " --> " + rs.perm);
 				Role temp = new Role();
 				temp.user.addAll(rt.user);
 				temp.perm.addAll(rt.perm);
@@ -66,14 +140,11 @@ class main{
 				temp.user.retainAll(rs.user);
 				temp.perm.retainAll(rs.perm);
 
-				// System.out.println(temp.user + " --> " + temp.perm);
 
 				if(temp.user.size() == 0 || temp.perm.size() == 0) {
-					// System.out.println("No ");
 				}
 
 				else {
-					// System.out.println("Yes ");
 					RoleFinal newRole = new RoleFinal();
 					newRole.user = temp.user;
 					newRole.perm = temp.perm;
@@ -82,22 +153,23 @@ class main{
 						Interval tempInterval = new Interval(REB.get(rt).get(i).min, REB.get(rt).get(i).max);
 						newRole.timeInt.add(tempInterval);
 					}
-					ultRS.add(newRole);
+					finalSTRoleSet.add(newRole);
 				}
 
-				// System.out.println("---------------------------");
 			}
 
+
 		}
-		
+
+		/* Remove all redundant rules */
 		Boolean canMerge = false;
 		do {
-			for(int i = 0; i < ultRS.size()-1; i++) {
-				for(int j = i+1; j < ultRS.size(); j++) {
+			for(int i = 0; i < finalSTRoleSet.size()-1; i++) {
+				for(int j = i+1; j < finalSTRoleSet.size(); j++) {
 
-					int l1 = ultRS.size();
-					ultRS = checkCompatible(ultRS, i, j);
-					int l2 = ultRS.size();
+					int l1 = finalSTRoleSet.size();
+					finalSTRoleSet = checkCompatible(finalSTRoleSet, i, j);
+					int l2 = finalSTRoleSet.size();
 
 					if(l1 > l2) {
 						canMerge = true;
@@ -110,85 +182,8 @@ class main{
 			}
 		} while (canMerge);
 
-		// print all the new "RoleFinals"
-
-		for(int i = 0; i < ultRS.size(); i++) {
-			System.out.print("r" + i + " ");
-			System.out.print(ultRS.get(i).user + "  ");
-			System.out.println(ultRS.get(i).perm + "  ");
-
-			System.out.print("int : ");
-			for(int j = 0; j < ultRS.get(i).timeInt.size(); j++) {
-				System.out.print("(" + ultRS.get(i).timeInt.get(j).min + "," + ultRS.get(i).timeInt.get(j).max + ") ");
-			}
-			System.out.println();
-			System.out.print("region : ");
-			for(int j = 0; j < ultRS.get(i).region.size(); j++) {
-				System.out.print(ultRS.get(i).region.get(j) + "  ");
-			}
-			System.out.println();
-			System.out.println("---------------------");
-
-		}
-
-		System.out.println("Total roles : " + ultRS.size());
-
-		// for(int i = 0; i < ultRS.size()-1; i++) {
-		// 	for(int j = i+1; j < ultRS.size(); j++) {
-		// 		ultRS = checkCompatible(ultRS, i, j);
-		// 	}
-		// }
-
-		long endTime = System.nanoTime();
-
-		long totalTime = endTime - startTime;
-		System.out.println(totalTime/Math.pow(10,9)+" seconds");
-
+		return finalSTRoleSet;
 	}
-
-	public static ArrayList<RoleFinal> checkCompatible (ArrayList<RoleFinal> ultRS, int i, int j) {
-		// user, time, region 
-		if(ultRS.get(i).user.equals(ultRS.get(j).user) && 
-			ultRS.get(i).region.equals(ultRS.get(j).region) &&
-			ultRS.get(i).timeInt.equals(ultRS.get(j).timeInt)) {
-				ultRS.get(i).perm.addAll(ultRS.get(j).perm);
-				ultRS.remove(j);	
-				// System.out.println("Needs further merging");
-		}
-
-		// user, perm, region 
-		else if(ultRS.get(i).user.equals(ultRS.get(j).user) && 
-			ultRS.get(i).region.equals(ultRS.get(j).region) &&
-			ultRS.get(i).perm.equals(ultRS.get(j).perm)) {
-				ultRS.get(i).timeInt.addAll(ultRS.get(j).timeInt);
-				ultRS.remove(j);
-				// System.out.println("Needs further merging");
-
-		}
-
-		// user, perm, time
-		else if(ultRS.get(i).user.equals(ultRS.get(j).user) && 
-			ultRS.get(i).perm.equals(ultRS.get(j).perm) &&
-			ultRS.get(i).timeInt.equals(ultRS.get(j).timeInt)) {
-				ultRS.get(i).region.addAll(ultRS.get(j).region);
-				ultRS.remove(j);
-				// System.out.println("Needs further merging");
-
-		}
-
-		// perm, time, region
-		else if(ultRS.get(i).perm.equals(ultRS.get(j).perm) && 
-			ultRS.get(i).region.equals(ultRS.get(j).region) &&
-			ultRS.get(i).timeInt.equals(ultRS.get(j).timeInt)) {
-				ultRS.get(i).user.addAll(ultRS.get(j).user);
-				ultRS.remove(j);
-				// System.out.println("Needs further merging");
-
-		}
-
-		return ultRS;
-	}
-
 	public static HashMap<Interval, ArrayList<Role>> getIntervalRSMap (STUPAReader stupaReader, HashMap<Interval, ArrayList<Role>> intRoleSetMap, Set<Role> combinedRoleSet) {
 
 		for(int i = 0; i < stupaReader.UPAmapTUPA.size(); i++) {
